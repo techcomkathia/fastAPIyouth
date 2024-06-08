@@ -1,13 +1,18 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
+
+class Produto(BaseModel):
+    nome: str
+    preco: float
 
 bancoDados = {
-    "1":{
+    1:{
         "nome": "Pizza",
-        "preco": "59,90"
+        "preco": 59.90
     },
-    "2":{
+    2:{
         "nome": "Lasanha",
-        "preço":"9,90"
+        "preço":9.90
     }
 }
 
@@ -44,5 +49,33 @@ def mostrarUMproduto(idProduto):
     except:
         return {
             "produto": "não encontrado",
-            "statuCode": 404
+            "statusCode": 404
         }
+
+@app.post("/produtos/cadastrar/")
+def cadastrarProduto( id: int, item: Produto):
+    listaProdutos = bancoDados.values()
+
+    for produto in listaProdutos:
+        if produto['nome'] == item.nome:
+            return {
+                "mensagem": "Produto já cadastrado ",
+                "statusCode" : 400
+            }
+        else :
+            bancoDados[id]= item
+            return {
+                "mensagem": "Item cridado com sucesso",
+                "Produto": item,
+                "statusCode": 200
+            }
+
+@app.delete("/produtos/excluir/{id}")
+def excluirProduto(id:int):
+    bancoDados.pop(id)
+    return {
+        "mensagem": "Produto excluído",
+        "idProduto": id,
+        "statusCode":200
+    }
+
